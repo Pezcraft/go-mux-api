@@ -64,6 +64,23 @@ jobs:
       - name: Set Docker tag
         run: docker image tag pezcraft/my-firstimage:0.0.1 pezcraft/my-firstimage:${{ steps.git_sha.outputs.GIT_SHA }}
 
+      - name: Docker Image Security Scan
+        uses: aquasecurity/trivy-action@0.20.0
+        continue-on-error: true
+        with:
+          image-ref: 'pezcraft/my-firstimage:${{ steps.git_sha.outputs.GIT_SHA }}'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          exit-code: 1
+
+      - name: IaC Security Scan
+        uses: aquasecurity/trivy-action@0.20.0
+        continue-on-error: false
+        with:
+          scan-type: 'config'
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
       - name: Push Docker image to Docker Hub
         run: docker image push pezcraft/my-firstimage:${{ steps.git_sha.outputs.GIT_SHA }}
-
